@@ -1,0 +1,2 @@
+ssid='yourSsid'
+password='yourPassword'
