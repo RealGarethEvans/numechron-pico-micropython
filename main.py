@@ -13,6 +13,8 @@ from wlan_settings import ssid, password
 TICK_BUTTON = Pin(10, Pin.IN, Pin.PULL_UP) # You can press this button to advance one minute
 FORWARD_BUTTON = Pin(11, Pin.IN, Pin.PULL_UP) # This button moves a tenth of a position so you can easily adjust the position
 BACKWARD_BUTTON = Pin(12, Pin.IN, Pin.PULL_UP) # And this one moves a tenth of a position backwards
+# You have to have the stepper control lines wired to four consecutive pins. Set the start pin here
+STEPPER_START_PIN = 6
 
 STEPS_PER_ROTATION = 383 # Actually a quarter of the number, because we do four steps at a time
 DEBOUNCE_TIME = 0.1
@@ -28,15 +30,16 @@ class Clock:
         self.backward_button_state = False
         self.debounce_time = DEBOUNCE_TIME
         self.rtc = RTC()
-        self.sm_forward = StateMachine(0, forward, freq=2000, set_base=Pin(6))
+        self.sm_forward = StateMachine(0, forward, freq=2000, set_base=Pin(STEPPER_START_PIN))
         self.sm_forward.active(1)
-        self.sm_backwards = StateMachine(1, backwards, freq=2000, set_base=Pin(6))
+        self.sm_backwards = StateMachine(1, backwards, freq=2000, set_base=Pin(STEPPER_START_PIN))
         self.sm_backwards.active(1)
         self.net = Network()
         self.set_time()
-        self.stop = False # Set this true to stop the clock loop
+        self.stop = False # Set this true to stop the clock loop. Useful while testing
 
     def rotate(self, steps):
+        # All we do to rotate the clock is put a number in the state machine's FIFO
         if steps >= 0:
             self.sm_forward.put(steps)
         else:
@@ -59,6 +62,8 @@ class Clock:
                 self.previous_min = minute
                 self.tick()
 
+            # I'm setting the time from the Internet every hour.
+            # If you think daily is more polite, uncomment this section, and comment out the next
             # if self.previous_day != self.rtc.datetime()[1]:
             #     self.previous_day = self.rtc.datetime()[1]
             #     self.set_time()
@@ -68,11 +73,14 @@ class Clock:
                 time.sleep(5) # so that we're not trying to do too many things at once
                 self.set_time()
 
+            # Check for button presses.
+            # We debounce by putting everything to sleep for a moment. Maybe not the most efficient,
+            # but it's a mechanical clock so it only needs to move once a minute.
             if self.tick_button is not None:
                 if self.tick_button.value() == 0 and self.tick_button_state == False:
                     self.tick_button_state = True
                     self.tick()
-                    time.sleep(self.debounce_time) # debounce button press
+                    time.sleep(self.debounce_time)
                 elif self.tick_button.value() == 1 and self.tick_button_state == True:
                     self.tick_button_state = False
 
@@ -80,7 +88,7 @@ class Clock:
                 if self.forward_button.value() == 0 and self.forward_button_state == False:
                     self.forward_button_state = True
                     self.adjust_angle(5)
-                    time.sleep(self.debounce_time) # debounce button press
+                    time.sleep(self.debounce_time)
                 elif self.forward_button.value() == 1 and self.forward_button_state == True:
                     self.forward_button_state = False
 
@@ -88,7 +96,7 @@ class Clock:
                 if self.backward_button.value() == 0 and self.backward_button_state == False:
                     self.backward_button_state = True
                     self.adjust_angle(-5)
-                    time.sleep(self.debounce_time) # debounce button press
+                    time.sleep(self.debounce_time)
                 elif self.backward_button.value() == 1 and self.backward_button_state == True:
                     self.backward_button_state = False
 
@@ -98,7 +106,7 @@ class Clock:
         print(f'time is currently {time[4]}:{time[5]}:{time[6]}')
         self.net.connect()
         try:
-            ntptime.settime()
+            ntptime.settime() # Almost too easy. I wonder where we get the time from...
             time = self.rtc.datetime()
         except Exception as e:
             print(f'Failed to set time: {e}')
@@ -127,6 +135,7 @@ class Network:
             while not self.wlan.isconnected():
                 pass
             print(f'Connected to wifi on {self.wlan.ifconfig()[0]}')
+            # Four blinks means success
             self.blink(4, 0.25)
         except Exception as e:
             print(f'Failed to connect to wifi: {e}')
@@ -135,6 +144,7 @@ class Network:
     def disconnect(self):
         self.wlan.disconnect()
         self.wlan.active(False)
+        # Three blinks means disconnected
         self.blink(3, 0.25)
         print('Disconnected from wifi')
 
@@ -145,8 +155,6 @@ class Network:
             self.led.value(0)
             time.sleep(how_long)
 
-# net = Network()
 
 clock = Clock(steps_per_rotation=STEPS_PER_ROTATION, tick_button=TICK_BUTTON, forward_button=FORWARD_BUTTON, backward_button=BACKWARD_BUTTON)
-#_thread.start_new_thread(clock.loop, ())
 clock.loop()
