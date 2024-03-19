@@ -9,10 +9,11 @@ import ntptime
 from motor_pio import forward, backwards
 from wlan_settings import ssid, password
 
-# Change these button numbers according to how you've got it wired
+# Change these button numbers according to how you've got it wired. It'll work fine if you don't bother with any of these buttons
 TICK_BUTTON = Pin(10, Pin.IN, Pin.PULL_UP) # You can press this button to advance one minute
 FORWARD_BUTTON = Pin(11, Pin.IN, Pin.PULL_UP) # This button moves a tenth of a position so you can easily adjust the position
 BACKWARD_BUTTON = Pin(12, Pin.IN, Pin.PULL_UP) # And this one moves a tenth of a position backwards
+
 # You have to have the stepper control lines wired to four consecutive pins. Set the start pin here
 STEPPER_START_PIN = 6
 
@@ -59,6 +60,7 @@ class Clock:
                 break
             minute = self.rtc.datetime()[5]
             if self.previous_min != minute:
+                print(f'Tick: {self.rtc.datetime()[4]}:{minute}')
                 self.previous_min = minute
                 self.tick()
 
@@ -70,8 +72,15 @@ class Clock:
 
             if self.previous_hour != self.rtc.datetime()[4]:
                 self.previous_hour = self.rtc.datetime()[4]
+                print(f'Hour is {self.previous_hour}')
                 time.sleep(5) # so that we're not trying to do too many things at once
                 self.set_time()
+
+            # if self.previous_tenmin != int((self.rtc.datetime()[5])/10):
+            #     self.previous_tenmin = int((self.rtc.datetime()[5])/10)
+            #     print(f'tenmin is {self.previous_tenmin}')
+            #     time.sleep(5) # so that we're not trying to do too many things at once
+            #     self.set_time()
 
             # Check for button presses.
             # We debounce by putting everything to sleep for a moment. Maybe not the most efficient,
@@ -117,6 +126,7 @@ class Clock:
             self.previous_min = time[5]
             # self.previous_day = time[1]
             self.previous_hour = time[4]
+            # self.previous_tenmin = int((self.rtc.datetime()[5])/10)
             self.net.disconnect()
         
 
