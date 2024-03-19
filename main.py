@@ -76,12 +76,6 @@ class Clock:
                 time.sleep(5) # so that we're not trying to do too many things at once
                 self.set_time()
 
-            # if self.previous_tenmin != int((self.rtc.datetime()[5])/10):
-            #     self.previous_tenmin = int((self.rtc.datetime()[5])/10)
-            #     print(f'tenmin is {self.previous_tenmin}')
-            #     time.sleep(5) # so that we're not trying to do too many things at once
-            #     self.set_time()
-
             # Check for button presses.
             # We debounce by putting everything to sleep for a moment. Maybe not the most efficient,
             # but it's a mechanical clock so it only needs to move once a minute.
@@ -124,9 +118,8 @@ class Clock:
             print(f'time is now {time[4]}:{time[5]}:{time[6]}')
             print(f'on {time[2]}/{time[1]} {time[0]}')
             self.previous_min = time[5]
-            # self.previous_day = time[1]
+            self.previous_day = time[1] # Probablyy not in use
             self.previous_hour = time[4]
-            # self.previous_tenmin = int((self.rtc.datetime()[5])/10)
             self.net.disconnect()
         
 
