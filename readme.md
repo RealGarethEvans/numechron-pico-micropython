@@ -6,7 +6,7 @@ with a Raspberry Pi Pico W. Using a Pico W rather than a plain Pico
 means it'll set the time automatically.
 
 ## Case
-I've designed a case for a Pico W and a ULN2003 driver board. You can get it from (TODO: add an address when it's uploaded). It's got space for four little buttons like [these](https://www.amazon.co.uk/dp/B07XWXV1TS). Three of them are in a row, and one is separate.
+I've designed a case for a Pico W and a ULN2003 driver board. You can get it from (https://www.printables.com/model/811699). It's got space for four little buttons like [these](https://www.amazon.co.uk/dp/B07XWXV1TS). Three of them are in a row, and one is separate.
 
 ## Buttons
 The buttons are wired to the most physically convenient pins in my case. They are:
