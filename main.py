@@ -64,17 +64,17 @@ class Clock:
                 self.previous_min = minute
                 self.tick()
 
-            # I'm setting the time from the Internet every hour.
-            # If you think daily is more polite, uncomment this section, and comment out the next
-            # if self.previous_day != self.rtc.datetime()[1]:
-            #     self.previous_day = self.rtc.datetime()[1]
-            #     self.set_time()
+                # I'm setting the time from the Internet every hour.
+                # If you think daily is more polite, uncomment this section, and comment out the next
+                # if self.previous_day != self.rtc.datetime()[1]:
+                #     self.previous_day = self.rtc.datetime()[1]
+                #     self.set_time()
 
-            if self.previous_hour != self.rtc.datetime()[4]:
-                self.previous_hour = self.rtc.datetime()[4]
-                print(f'Hour is {self.previous_hour}')
-                time.sleep(5) # so that we're not trying to do too many things at once
-                self.set_time()
+                if self.previous_hour != self.rtc.datetime()[4]:
+                    self.previous_hour = self.rtc.datetime()[4]
+                    print(f'Hour is {self.previous_hour}')
+                    time.sleep(10) # so that we're not trying to do too many things at once
+                    self.set_time()
 
             # Check for button presses.
             # We debounce by putting everything to sleep for a moment. Maybe not the most efficient,
